@@ -95,7 +95,15 @@ def imprimir_matriz_combinada(matriz_comida, matriz_movimento):
                 matriz_combinada[i][j] = matriz_comida[i][j]  # Mantém o valor original da comida
 
     for linha in matriz_combinada:
-        print(' '.join(map(str, linha)))
+        for elemento in linha:
+            if elemento == 1:
+                print(".", end="")
+            elif elemento == '*':
+                print("*", end="")
+            else:
+                print(" ", end="")
+        print()
+        #print(' '.join(map(str, linha)))
 
 def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao):
     matriz_comida = gerar_matriz(linhas, colunas)
@@ -114,10 +122,10 @@ def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, interv
         parar_formigas(formigas)
 
 linhas = 20
-colunas = 50
+colunas = 60
 num_formigas = 20
 num_comida = 150
-duracao_simulacao = 100  # iteracoes
+duracao_simulacao = 1000  # iteracoes
 intervalo_atualizacao = 0.1
 
 simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao)
