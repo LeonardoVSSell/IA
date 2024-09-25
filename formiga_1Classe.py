@@ -185,6 +185,6 @@ num_formigas = 10
 num_comida = 150
 duracao_simulacao = 1000  # iteracoes
 intervalo_atualizacao = 0.1
-raio_visao = 1
+raio_visao = 2
 
 simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao, raio_visao)
