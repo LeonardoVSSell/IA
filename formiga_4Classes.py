@@ -5,9 +5,8 @@ import time
 import math
 
 class Comida:
-    def __init__(self, x, y, grupo):
+    def __init__(self, x, y):
         self.valores = [float(x), float(y)]
-        self.grupo = grupo
         self.simbolo = self.definir_simbolo()
 
     def definir_simbolo(self):
@@ -22,7 +21,6 @@ class Comida:
             return "+"  # Quarto quadrante
         else:
             return " "
-        
     def get_valores(self):
         return self.valores
 
