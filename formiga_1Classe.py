@@ -183,7 +183,7 @@ linhas = 20
 colunas = 60
 num_formigas = 10
 num_comida = 150
-duracao_simulacao = 1000  # iteracoes
+duracao_simulacao = 500  # iteracoes
 intervalo_atualizacao = 0.1
 raio_visao = 2
 

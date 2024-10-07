@@ -1,7 +1,7 @@
-/usr/bin/python3 /home/g05861323925/codigos/formiga_4Classes.py
+/usr/bin/python3 /home/g05861323925/codigos/formiga_15Classes.py
 
 Cria a sessão com o codigo rodando
-	screen -dmS simulacao_formigas python3 formiga_4Classes.py
+	screen -dmS simulacao_formigas python3 formiga_15Classes.py
 
 Mostra as sessões
 	screen -ls
