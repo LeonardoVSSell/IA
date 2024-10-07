@@ -1,0 +1,18 @@
+/usr/bin/python3 /home/g05861323925/codigos/formiga_4Classes.py
+
+Cria a sessão com o codigo rodando
+	screen -dmS simulacao_formigas python3 formiga_4Classes.py
+
+Mostra as sessões
+	screen -ls
+
+Volta para a sessão
+	screen -r simulacao_formigas
+
+Sai da sessão
+	apertar (Ctrl + A) + D
+
+Mata a sessão
+	screen -X -S simulacao_formigas quit
+
+

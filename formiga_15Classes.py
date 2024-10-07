@@ -11,15 +11,8 @@ class Comida:
         self.simbolo = self.definir_simbolo()
 
     def definir_simbolo(self):
-        x, y = self.valores
-        if x > 0 and y > 0:
-            return "."  # Primeiro quadrante
-        elif x < 0 and y > 0:
-            return ","  # Segundo quadrante
-        elif x < 0 and y < 0:
-            return "-"  # Terceiro quadrante
-        elif x>0 and y<0:
-            return "+"  # Quarto quadrante
+        if 0 <= (self.grupo + 64) <= 127:
+            return chr(self.grupo + 64)  # simbolo correspondente da tabela asc
         else:
             return " "
         
@@ -145,32 +138,24 @@ class Formiga(threading.Thread):
 def gerar_matriz(linhas, colunas):
     return [[None for _ in range(colunas)] for _ in range(linhas)]
 
-def distribuir_comida(matriz, num_comida):
+def ler_dados_arquivo(nome_arquivo):
+    lista_comidas = []
+    with open(nome_arquivo, 'r') as arquivo:
+        for linha in arquivo:
+            dados = linha.strip().split()
+            if len(dados) == 3:
+                x, y, grupo = float(dados[0]), float(dados[1]), int(dados[2])
+                lista_comidas.append(Comida(x, y, grupo))
+    return lista_comidas
+
+def distribuir_comida(matriz, lista_comidas):
     linhas = len(matriz)
     colunas = len(matriz[0])
 
-    for _ in range(num_comida):
-        tipoComida = random.randrange(0, 4)
-        if(tipoComida==0):
-            #(+,+)
-            x = random.uniform( 15, 25)
-            y = random.uniform( 15, 25)
-        elif(tipoComida==1):
-            #(-,+)
-            x = random.uniform(-15, -25)
-            y = random.uniform( 15, 25)
-        elif(tipoComida==2):
-            #(-,-)
-            x = random.uniform(-25, -15)
-            y = random.uniform(-25, -15)
-        else:
-            #(+,-)
-            x = random.uniform( 15, 25)
-            y = random.uniform(-15, -25)
-        
+    for comida in lista_comidas:
         i = random.randint(0, linhas - 1)
         j = random.randint(0, colunas - 1)
-        matriz[i][j] = Comida(x, y)
+        matriz[i][j] = comida
 
 def gerar_formigas(matriz_movimento, matriz_comida, num_formigas, raio_visao, alfa, k1, k2):
     linhas = len(matriz_movimento)
@@ -228,10 +213,11 @@ def salvar_matriz_em_arquivo(matriz, nome_arquivo):
                     f.write(' ')
             f.write('\n')
 
-def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2):
+def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2, arquivo_dados):
     matriz_comida = gerar_matriz(linhas, colunas)
     matriz_movimento = gerar_matriz(linhas, colunas)
-    distribuir_comida(matriz_comida, num_comida)
+    lista_comidas = ler_dados_arquivo(arquivo_dados)
+    distribuir_comida(matriz_comida, lista_comidas)
 
     formigas = gerar_formigas(matriz_movimento, matriz_comida, num_formigas, raio_visao, alfa, k1, k2)
 
@@ -265,5 +251,6 @@ raio_visao = 2
 alfa = 10
 k1 = 0.05
 k2 = 0.95
+arquivo_dados = 'dados_15Grupos.txt'
 
-simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2)
+simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2, arquivo_dados)
