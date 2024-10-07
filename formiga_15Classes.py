@@ -221,7 +221,7 @@ def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, interv
 
     formigas = gerar_formigas(matriz_movimento, matriz_comida, num_formigas, raio_visao, alfa, k1, k2)
 
-    salvar_matriz_em_arquivo(matriz_comida, 'matriz_comida_inicio.txt')
+    salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_inicio.txt')
 
     try:
         for i in range(duracao_simulacao):
@@ -231,15 +231,15 @@ def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, interv
             time.sleep(intervalo_atualizacao)
 
             if i == duracao_simulacao//4:
-                salvar_matriz_em_arquivo(matriz_comida, 'matriz_comida_1_quarto.txt')
+                salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_1_quarto.txt')
             if i == duracao_simulacao//2:
-                salvar_matriz_em_arquivo(matriz_comida, 'matriz_comida_meio.txt')
+                salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_meio.txt')
             if i == (3*duracao_simulacao//4):
-                salvar_matriz_em_arquivo(matriz_comida, 'matriz_comida_3_quartos.txt')
+                salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_3_quartos.txt')
             #continue
     finally:
         parar_formigas(formigas)
-        salvar_matriz_em_arquivo(matriz_comida, 'matriz_comida_fim.txt')
+        salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_fim.txt')
 
 linhas = 30
 colunas = 60
