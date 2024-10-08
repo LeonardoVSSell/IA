@@ -8,6 +8,7 @@ Mostra as sessões
 
 Volta para a sessão
 	screen -r simulacao_formigas
+	screen -r 1386869.simulacao_formigas
 
 Sai da sessão
 	apertar (Ctrl + A) + D

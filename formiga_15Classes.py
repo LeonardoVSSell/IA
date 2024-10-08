@@ -62,8 +62,8 @@ class Formiga(threading.Thread):
         if(isinstance(self.carregando, Comida)):
             valores_Posicao_Atual = self.carregando.get_valores()
         else:
-            #caso nao esteja carregando nada, a disparidade é a maior possivel, como fazer isso? eu fiz que a posicao atual é (0,0) pois so fica a comparação com o objeto atual
-            valores_Posicao_Atual = (0,0)#?
+            #caso nao esteja carregando nada, a disparidade é a igual para todos, eu fiz que a posicao atual é (0,0)
+            valores_Posicao_Atual = (0,0)#certo?
         
         x_min = max(0, x - self.raio_visao)
         x_max = min(len(self.matriz_comida), x + self.raio_visao+1)
@@ -138,6 +138,17 @@ class Formiga(threading.Thread):
 def gerar_matriz(linhas, colunas):
     return [[None for _ in range(colunas)] for _ in range(linhas)]
 
+def normalizar_dados(lista_comidas):
+    """ Normaliza os valores x e y de uma lista de objetos Comida """
+    min_x = min(comida.valores[0] for comida in lista_comidas)
+    max_x = max(comida.valores[0] for comida in lista_comidas)
+    min_y = min(comida.valores[1] for comida in lista_comidas)
+    max_y = max(comida.valores[1] for comida in lista_comidas)
+
+    for comida in lista_comidas:
+        comida.valores[0] = (comida.valores[0] - min_x) / (max_x - min_x)  # Normaliza x
+        comida.valores[1] = (comida.valores[1] - min_y) / (max_y - min_y)  # Normaliza y
+
 def ler_dados_arquivo(nome_arquivo):
     lista_comidas = []
     with open(nome_arquivo, 'r') as arquivo:
@@ -146,6 +157,9 @@ def ler_dados_arquivo(nome_arquivo):
             if len(dados) == 3:
                 x, y, grupo = float(dados[0]), float(dados[1]), int(dados[2])
                 lista_comidas.append(Comida(x, y, grupo))
+
+    normalizar_dados(lista_comidas)
+
     return lista_comidas
 
 def distribuir_comida(matriz, lista_comidas):
@@ -213,7 +227,7 @@ def salvar_matriz_em_arquivo(matriz, nome_arquivo):
                     f.write(' ')
             f.write('\n')
 
-def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2, arquivo_dados):
+def simular(linhas, colunas, num_formigas, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2, arquivo_dados):
     matriz_comida = gerar_matriz(linhas, colunas)
     matriz_movimento = gerar_matriz(linhas, colunas)
     lista_comidas = ler_dados_arquivo(arquivo_dados)
@@ -221,36 +235,35 @@ def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, interv
 
     formigas = gerar_formigas(matriz_movimento, matriz_comida, num_formigas, raio_visao, alfa, k1, k2)
 
-    salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_inicio.txt')
+    salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_0_quartos.txt')
 
     try:
         for i in range(duracao_simulacao):
-            limpar_terminal()
+            #limpar_terminal()
             #print("")
-            imprimir_matriz_combinada(matriz_comida, matriz_movimento)
-            time.sleep(intervalo_atualizacao)
+            #imprimir_matriz_combinada(matriz_comida, matriz_movimento)
+            #time.sleep(intervalo_atualizacao)
 
             if i == duracao_simulacao//4:
-                salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_1_quarto.txt')
+                salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_1_quartos.txt')
             if i == duracao_simulacao//2:
-                salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_meio.txt')
+                salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_2_quartos.txt')
             if i == (3*duracao_simulacao//4):
                 salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_3_quartos.txt')
             #continue
     finally:
         parar_formigas(formigas)
-        salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_fim.txt')
+        salvar_matriz_em_arquivo(matriz_comida, 'matriz_15_comida_4_quartos.txt')
 
 linhas = 30
-colunas = 60
+colunas = 80
 num_formigas = 20
-num_comida = 450
-duracao_simulacao = 2000000  # iteracoes
+duracao_simulacao = 2000000000  # iteracoes
 intervalo_atualizacao = 0.1
-raio_visao = 2
-alfa = 10
+raio_visao = 5
+alfa = 0.2
 k1 = 0.05
 k2 = 0.95
 arquivo_dados = 'dados_15Grupos.txt'
 
-simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2, arquivo_dados)
+simular(linhas, colunas, num_formigas, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2, arquivo_dados)
