@@ -148,6 +148,7 @@ def normalizar_dados(lista_comidas):
     for comida in lista_comidas:
         comida.valores[0] = (comida.valores[0] - min_x) / (max_x - min_x)  # Normaliza x
         comida.valores[1] = (comida.valores[1] - min_y) / (max_y - min_y)  # Normaliza y
+    return lista_comidas
 
 def ler_dados_arquivo(nome_arquivo):
     lista_comidas = []
@@ -158,7 +159,7 @@ def ler_dados_arquivo(nome_arquivo):
                 x, y, grupo = float(dados[0]), float(dados[1]), int(dados[2])
                 lista_comidas.append(Comida(x, y, grupo))
 
-    normalizar_dados(lista_comidas)
+    lista_comidas = normalizar_dados(lista_comidas)
 
     return lista_comidas
 
@@ -258,12 +259,12 @@ def simular(linhas, colunas, num_formigas, duracao_simulacao, intervalo_atualiza
 linhas = 30
 colunas = 80
 num_formigas = 20
-duracao_simulacao = 2000000000  # iteracoes
 intervalo_atualizacao = 0.1
-raio_visao = 5
-alfa = 0.2
-k1 = 0.05
-k2 = 0.95
+duracao_simulacao = 8000000000  # iteracoes
+raio_visao = 2
+alfa = 0.08
+k1 = 0.1
+k2 = 0.9
 arquivo_dados = 'dados_15Grupos.txt'
 
 simular(linhas, colunas, num_formigas, duracao_simulacao, intervalo_atualizacao, raio_visao, alfa, k1, k2, arquivo_dados)

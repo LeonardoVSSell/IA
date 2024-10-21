@@ -30,7 +30,7 @@ class Formiga(threading.Thread):
                     self.matriz_movimento[nova_posicao[0]][nova_posicao[1]] = "*"  # Ocupa nova posição
                     self.posicao = nova_posicao
 
-            time.sleep(random.uniform(0.1, 0.1))
+            time.sleep(random.uniform(0.01, 0.01))
 
     def contar_comida_vizinhanca(self):
         contadorItens = 0
@@ -181,9 +181,9 @@ def simular(linhas, colunas, num_formigas, num_comida, duracao_simulacao, interv
 
 linhas = 20
 colunas = 60
-num_formigas = 10
+num_formigas = 20
 num_comida = 150
-duracao_simulacao = 500  # iteracoes
+duracao_simulacao = 2000  # iteracoes
 intervalo_atualizacao = 0.1
 raio_visao = 2
 
