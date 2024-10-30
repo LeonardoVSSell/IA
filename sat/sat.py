@@ -66,9 +66,10 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
     historico_temperatura = [T0]
 
     T = T0
+    T_grafico = T
     iteracoes = 0
     
-    while iteracoes < itMax and T > 0.0001:
+    while iteracoes < itMax and T_grafico > 0.0001:
         iterT = 0
         
         while iterT < SAmAx:
@@ -91,18 +92,24 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
                     melhor_solucao = vizinho[:]
                     f_melhor = f_vizinho
             else:
-                if random.uniform(0, 1) < math.exp(-delta / T):
+                if random.uniform(0, 1) < math.exp(-delta / max(T,0.0000001)):
                     solucao_atual = vizinho[:]
                     f_atual = f_vizinho
 
             #guarda para grafico
             historico_f_objetivo.append(f_atual)
         
+            #atualiza temp
+            T = temperatura_atual(T, iteracoes, itMax, t, T0)
+            
+            #guarda para grafico
+            historico_temperatura.append(T)
+
         #atualiza temp
-        T = temperatura_atual(T, iteracoes, itMax, t, T0)
+        #T = temperatura_atual(T, iteracoes, itMax, t, T0)
         
         #guarda para grafico
-        historico_temperatura.append(T)
+        #historico_temperatura.append(T)
     
     return melhor_solucao, f_melhor, historico_f_objetivo, historico_temperatura
 
@@ -111,7 +118,7 @@ if __name__ == "__main__":
     clausulas, numeroLiterais = ler_instancia(arquivo_instancia)
     T0 = 10000
     itMax = 40000
-    t = 3
+    t = 5
     SAmAx = 1000
 
     solucao_final, valor_otimo, historico_f_objetivo, historico_temperatura = simulated_annealing(clausulas, numeroLiterais, T0, itMax, t, SAmAx)
@@ -141,3 +148,5 @@ if __name__ == "__main__":
 
     plt.savefig('simulated_annealing_temperatura.png')
     #plt.show()
+
+
