@@ -52,8 +52,9 @@ def gerar_vizinho(solucao, percentual_modificacao=0.05):
     
     return nova_solucao
 
-def temperatura_atual(T, it, itMax, t, T0):
-    return T * (1 - it/itMax)**t
+def coeficiente_temperatura_atual(T, it, itMax, t, T0, TN):
+    return (1 - it/itMax)**t
+    #return (T0 - TN) / (1 + math.exp(-3 * (it - itMax / 2) / itMax/10)) + TN
 
 def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
     solucao_atual = gerar_solucao_aleatoria(n_variaveis)
@@ -66,10 +67,9 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
     historico_temperatura = [T0]
 
     T = T0
-    T_grafico = T
     iteracoes = 0
     
-    while iteracoes < itMax and T_grafico > 0.0001:
+    while iteracoes < itMax and T > 0.000000000001:
         iterT = 0
         
         while iterT < SAmAx:
@@ -92,33 +92,27 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
                     melhor_solucao = vizinho[:]
                     f_melhor = f_vizinho
             else:
-                if random.uniform(0, 1) < math.exp(-delta / max(T,0.0000001)):
+                if random.uniform(0, 1) < math.exp(-delta / T):
                     solucao_atual = vizinho[:]
                     f_atual = f_vizinho
 
             #guarda para grafico
             historico_f_objetivo.append(f_atual)
-        
-            #atualiza temp
-            T = temperatura_atual(T, iteracoes, itMax, t, T0)
-            
+                    
             #guarda para grafico
-            historico_temperatura.append(T)
+            historico_temperatura.append(T*coeficiente_temperatura_atual(T, iteracoes, itMax, t, T0, 1))
 
         #atualiza temp
-        #T = temperatura_atual(T, iteracoes, itMax, t, T0)
-        
-        #guarda para grafico
-        #historico_temperatura.append(T)
-    
+        T = T*coeficiente_temperatura_atual(T, iteracoes, itMax, t, T0, 1)
+            
     return melhor_solucao, f_melhor, historico_f_objetivo, historico_temperatura
 
 if __name__ == "__main__":
-    arquivo_instancia = '/home/leonardo/Documentos/2024_02/IA/github/IA/sat/uf250-01.cnf'  # caminho
+    arquivo_instancia = 'uf250-01.cnf'  # caminho
     clausulas, numeroLiterais = ler_instancia(arquivo_instancia)
     T0 = 10000
-    itMax = 40000
-    t = 5
+    itMax = 80000
+    t = 1
     SAmAx = 1000
 
     solucao_final, valor_otimo, historico_f_objetivo, historico_temperatura = simulated_annealing(clausulas, numeroLiterais, T0, itMax, t, SAmAx)
