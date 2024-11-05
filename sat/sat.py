@@ -1,6 +1,10 @@
+import os
 import random
 import math
 import matplotlib.pyplot as plt
+import numpy as np
+from math import exp, log, cos, cosh, tanh, pi
+
 
 def ler_instancia(arquivo):
     clausulas = []
@@ -58,7 +62,7 @@ def coeficiente_temperatura_atual(T, it, itMax, t, T0, TN):
 
 def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
     solucao_atual = gerar_solucao_aleatoria(n_variaveis)
-    melhor_solucao = solucao_atual[:]
+    melhor_valor = solucao_atual[:]
     
     f_atual = calcular_clausulas_nao_satisfeitas(clausulas, solucao_atual)
     f_melhor = f_atual
@@ -89,7 +93,7 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
                 
                 # melhor solução
                 if f_vizinho < f_melhor:
-                    melhor_solucao = vizinho[:]
+                    melhor_valor = vizinho[:]
                     f_melhor = f_vizinho
             else:
                 if random.uniform(0, 1) < math.exp(-delta / T):
@@ -105,42 +109,93 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx):
         #atualiza temp
         T = T*coeficiente_temperatura_atual(T, iteracoes, itMax, t, T0, 1)
             
-    return melhor_solucao, f_melhor, historico_f_objetivo, historico_temperatura
+    return melhor_valor, f_melhor, historico_f_objetivo, historico_temperatura
 
 if __name__ == "__main__":
-    arquivo_instancia = 'uf250-01.cnf'  # caminho
-    clausulas, numeroLiterais = ler_instancia(arquivo_instancia)
     T0 = 10000
     itMax = 80000
     t = 1
     SAmAx = 1000
+    entradas = [
+        ('uf20-01.cnf', 'uf20'),
+        ('uf100-01.cnf', 'uf100'),
+        ('uf250-01.cnf', 'uf250')
+    ]
+    repeticoes = 10
 
-    solucao_final, valor_otimo, historico_f_objetivo, historico_temperatura = simulated_annealing(clausulas, numeroLiterais, T0, itMax, t, SAmAx)
+    for arquivo_instancia, pasta_saida in entradas:
+        # Crie a pasta de saída, se não existir
+        os.makedirs(pasta_saida, exist_ok=True)
+        
+        # Carregue as cláusulas e literais do arquivo de entrada atual
+        clausulas, numeroLiterais = ler_instancia(arquivo_instancia)
     
-    #print(f"Solucao otima: {solucao_final}")
-    print(f"Número de cláusulas não satisfeitas: {valor_otimo}")
-    
-    # Plotar o gráfico de convergência
-    plt.figure(figsize=(12, 5))
-
-    # Gráfico 1: Convergência do Simulated Annealing
-    plt.plot(historico_f_objetivo)
-    plt.title('Convergência do SA')
-    plt.xlabel('Iteracoes')
-    plt.ylabel('Numero de clausulas nao satisfeitas')
-    plt.grid(True)
-    
-    plt.savefig('simulated_annealing_convergence.png')
-    #plt.show()
-
-    # Gráfico 2: Queda da temperatura
-    plt.plot(historico_temperatura)
-    plt.title('Queda de temperatura durante SA')
-    plt.xlabel('Iteracoes')
-    plt.ylabel('Temperatura')
-    plt.grid(True)
-
-    plt.savefig('simulated_annealing_temperatura.png')
-    #plt.show()
+        historicos_f_objetivo = []
+        historicos_temperatura = []
+        melhor_valor = 1065
+        melhor_objetivo = []
+        solucao_otima = []
+        
+        for _ in range(repeticoes):
+            # Execute o simulated annealing
+            solucao_final, valor_otimo, historico_f_objetivo, historico_temperatura = simulated_annealing(
+                clausulas, numeroLiterais, T0, itMax, t, SAmAx
+            )
+            historicos_f_objetivo.append(historico_f_objetivo)
+            historicos_temperatura.append(historico_temperatura)
+            #print(valor_otimo)
+            #print(melhor_valor)
+            if valor_otimo < melhor_valor:
+                melhor_valor = valor_otimo
+                melhor_objetivo = historico_f_objetivo
+                solucao_otima = solucao_final
 
 
+            # Calcula média e desvio padrão para cada ponto de iteração
+            medias_f_objetivo = np.mean(historicos_f_objetivo, axis=0)
+            desvios_f_objetivo = np.std(historicos_f_objetivo, axis=0)
+
+            medias_temperatura = np.mean(historicos_temperatura, axis=0)
+            desvios_temperatura = np.std(historicos_temperatura, axis=0)
+
+            # Salvar gráfico de média de convergência com desvio padrão
+            plt.figure(figsize=(12, 5))
+            plt.plot(medias_f_objetivo, label='Média')
+            plt.fill_between(range(len(medias_f_objetivo)),
+                            medias_f_objetivo - desvios_f_objetivo,
+                            medias_f_objetivo + desvios_f_objetivo,
+                            color='b', alpha=0.2, label='Desvio padrão')
+            plt.title(f'Convergência média do SA - Função 0')
+            plt.xlabel('Iterações')
+            plt.ylabel('Número médio de cláusulas não satisfeitas')
+            plt.legend()
+            plt.grid(True)
+            plt.savefig(os.path.join(pasta_saida, f'SA_convergence_avg_std_0.png'))
+            plt.close()
+
+        # Salvar o gráfico de convergência para a função atual
+        plt.figure(figsize=(12, 5))
+        plt.plot(melhor_objetivo)
+        plt.title(f'Convergência do melhor SA - Função 0')
+        plt.xlabel('Iterações')
+        plt.ylabel('Número de cláusulas não satisfeitas')
+        plt.grid(True)
+        plt.savefig(os.path.join(pasta_saida, f'SA_convergence_0.png'))
+        plt.close()
+
+        # Salvar o gráfico de queda de temperatura para a função atual
+        plt.figure(figsize=(12, 5))
+        plt.plot(historico_temperatura)
+        plt.title(f'Queda de temperatura durante SA - Função 0')
+        plt.xlabel('Iterações')
+        plt.ylabel('Temperatura')
+        plt.grid(True)
+        plt.savefig(os.path.join(pasta_saida, f'SA_temperatura_0.png'))
+        plt.close()
+
+        print(f"Arquivo: {arquivo_instancia}")
+        print(f"Valor médio de cláusulas não-resolvidas: {min(medias_f_objetivo)}")
+        print(f"Desvio Padrao de cláusulas não-resolvidas: {min(desvios_f_objetivo)}")
+        print(f"Clausulas nao resolvidas: {melhor_valor}")
+        print(f"Solucao: {solucao_otima}")        
+        print("\n")
