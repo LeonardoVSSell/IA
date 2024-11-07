@@ -116,16 +116,15 @@ def func9(T0: int, it: int, TN:int, itMax:int) -> float:
     return T0*exp(a*it**2)
 
 def func10(T0, it, TN, itMax):
-    # Parâmetros para controlar a forma da curva sigmoidal
-    midpoint = itMax / 3  # Ponto médio das iterações onde a transição ocorre
-    steepness = 100  # Ajusta a inclinação da transição; aumente para uma queda mais abrupta
+    #curva sigmoidal
+    midpoint = itMax / 3  #Ponto de transição
+    steepness = 100  #inclinação 
 
-    # Função logística para controlar a temperatura
     return TN + (T0 - TN) / (1+ math.exp((it - midpoint) / (itMax / steepness)))
 
 def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx, cont):
     solucao_atual = gerar_solucao_aleatoria(n_variaveis)
-    melhor_solucao = solucao_atual[:]
+    melhor_valor = solucao_atual[:]
     
     f_atual = calcular_clausulas_nao_satisfeitas(clausulas, solucao_atual)
     f_melhor = f_atual
@@ -156,7 +155,7 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx, cont):
                 
                 # Melhor solução
                 if f_vizinho < f_melhor:
-                    melhor_solucao = vizinho[:]
+                    melhor_valor = vizinho[:]
                     f_melhor = f_vizinho
                     
             else:
@@ -204,7 +203,7 @@ def simulated_annealing(clausulas, n_variaveis, T0, itMax, t, SAmAx, cont):
                 T = func10(T0, iteracoes, 1 , itMax)
                 
 
-    return melhor_solucao, f_melhor, historico_f_objetivo, historico_temperatura
+    return melhor_valor, f_melhor, historico_f_objetivo, historico_temperatura
 
 
 if __name__ == "__main__":
@@ -231,8 +230,9 @@ if __name__ == "__main__":
                 
                 
                 historicos_f_objetivo = []
-                melhor_solucao = 1065
+                melhor_valor = 1065
                 melhor_objetivo = []
+                solucao_otima = []
                 
                 for _ in range(repeticoes):
                     # Execute o simulated annealing
@@ -240,10 +240,10 @@ if __name__ == "__main__":
                         clausulas, numeroLiterais, T0, itMax, t, SAmAx, i
                     )
                     historicos_f_objetivo.append(historico_f_objetivo)
-                    if solucao_final<melhor_solucao:
-                        melhor_solucao = solucao_final
+                    
+                    if solucao_final < melhor_valor:
+                        melhor_valor = solucao_final
                         melhor_objetivo = historico_f_objetivo
-
 
                     # Calcula média e desvio padrão para cada ponto de iteração
                     medias_f_objetivo = np.mean(historicos_f_objetivo, axis=0)
@@ -273,7 +273,9 @@ if __name__ == "__main__":
                 plt.grid(True)
                 plt.savefig(os.path.join(pasta_saida, f'SA_convergence_{i}.png'))
 
-                print(f"Arquivo: {arquivo_instancia}, Função de resfriamento: {i}")
+                print(f"Arquivo: {arquivo_instancia}")
                 print(f"Valor médio de cláusulas não-resolvidas: {min(medias_f_objetivo)}")
                 print(f"Desvio Padrao de cláusulas não-resolvidas: {min(desvios_f_objetivo)}")
+                print(f"Clausulas nao resolvidas: {melhor_valor}")
+                print(f"Solucao: {solucao_otima}")        
                 print("\n")
