@@ -56,31 +56,60 @@ def gerar_vizinho(solucao, percentual_modificacao=0.05):
     
     return nova_solucao
 
-def random_search(clausulas, n_variaveis, T0, itMax, t, SAmAx):
-    # Solução aleatória inicial
+def coeficiente_temperatura_atual(T, it, itMax, t, T0, TN):
+    return (1 - it/itMax)**t
+    #return (T0 - TN) / (1 + math.exp(-3 * (it - itMax / 2) / itMax/10)) + TN
+
+def simulated_annealingC(clausulas, n_variaveis, T0, itMax, t, SAmAx):
     solucao_atual = gerar_solucao_aleatoria(n_variaveis)
     melhor_valor = solucao_atual[:]
     
-    # Avalia a função objetivo para a solução inicial
-    f_melhor = calcular_clausulas_nao_satisfeitas(clausulas, solucao_atual)
+    f_atual = calcular_clausulas_nao_satisfeitas(clausulas, solucao_atual)
+    f_melhor = f_atual
+
+    historico_f_objetivo = [f_atual]
+    historico_temperatura = [T0]
+
+    T = T0
+    iteracoes = 0
     
-    historico_f_objetivo = [f_melhor]
-    
-    # Repita até atingir o limite de iterações
-    for _ in range(itMax):
-        # Gera uma nova solução aleatória
-        nova_solucao = gerar_solucao_aleatoria(n_variaveis)
-        f_nova = calcular_clausulas_nao_satisfeitas(clausulas, nova_solucao)
+    while iteracoes < itMax and T > 0.000000000001:
+        iterT = 0
         
-        # Se a nova solução for melhor, atualiza a melhor solução
-        if f_nova < f_melhor:
-            melhor_valor = nova_solucao[:]
-            f_melhor = f_nova
-        
-        # Guarda a função objetivo atual para análise
-        historico_f_objetivo.append(f_nova)
-    
-    return melhor_valor, f_melhor, historico_f_objetivo
+        while iterT < SAmAx:
+            iterT += 1
+            iteracoes += 1
+            
+            #gera vizinho e sua funcao
+            vizinho = gerar_vizinho(solucao_atual)
+            f_vizinho = calcular_clausulas_nao_satisfeitas(clausulas, vizinho)
+            
+            delta = f_vizinho - f_atual
+            
+            # nova solução
+            if delta < 0:
+                solucao_atual = vizinho[:]
+                f_atual = f_vizinho
+                
+                # melhor solução
+                if f_vizinho < f_melhor:
+                    melhor_valor = vizinho[:]
+                    f_melhor = f_vizinho
+            else:
+                if random.uniform(0, 1) < math.exp(-delta / T):
+                    solucao_atual = vizinho[:]
+                    f_atual = f_vizinho
+
+            #guarda para grafico
+            historico_f_objetivo.append(f_atual)
+                    
+            #guarda para grafico
+            historico_temperatura.append(T*coeficiente_temperatura_atual(T, iteracoes, itMax, t, T0, 1))
+
+        #atualiza temp
+        T = T*coeficiente_temperatura_atual(T, iteracoes, itMax, t, T0, 1)
+            
+    return melhor_valor, f_melhor, historico_f_objetivo, historico_temperatura
 
 if __name__ == "__main__":
     T0 = 10000
@@ -108,7 +137,7 @@ if __name__ == "__main__":
         
         for _ in range(repeticoes):
             # Execute o simulated annealing
-            solucao_final, valor_otimo, historico_f_objetivo = random_search(
+            solucao_final, valor_otimo, historico_f_objetivo, historico_temperatura = simulated_annealingC(
                 clausulas, numeroLiterais, T0, itMax, t, SAmAx
             )
             historicos_f_objetivo.append(historico_f_objetivo)
@@ -131,22 +160,32 @@ if __name__ == "__main__":
                             medias_f_objetivo - desvios_f_objetivo,
                             medias_f_objetivo + desvios_f_objetivo,
                             color='b', alpha=0.2, label='Desvio padrão')
-            plt.title(f'Convergência média do RS - Função 0')
+            plt.title(f'Convergência média do SA - Função 0')
             plt.xlabel('Iterações')
             plt.ylabel('Número médio de cláusulas não satisfeitas')
             plt.legend()
             plt.grid(True)
-            plt.savefig(os.path.join(pasta_saida, f'RS_convergence_avg_std_0.png'))
+            plt.savefig(os.path.join(pasta_saida, f'SA_convergence_avg_std_0.png'))
             plt.close()
 
         # Salvar o gráfico de convergência para a função atual
         plt.figure(figsize=(12, 5))
         plt.plot(melhor_objetivo)
-        plt.title(f'Convergência do melhor RS - Função 0')
+        plt.title(f'Convergência do melhor SA - Função 0')
         plt.xlabel('Iterações')
         plt.ylabel('Número de cláusulas não satisfeitas')
         plt.grid(True)
-        plt.savefig(os.path.join(pasta_saida, f'RS_convergence_0.png'))
+        plt.savefig(os.path.join(pasta_saida, f'SA_convergence_0.png'))
+        plt.close()
+
+        # Salvar o gráfico de queda de temperatura para a função atual
+        plt.figure(figsize=(12, 5))
+        plt.plot(historico_temperatura)
+        plt.title(f'Queda de temperatura durante SA - Função 0')
+        plt.xlabel('Iterações')
+        plt.ylabel('Temperatura')
+        plt.grid(True)
+        plt.savefig(os.path.join(pasta_saida, f'SA_temperatura_0.png'))
         plt.close()
 
         print(f"Arquivo: {arquivo_instancia}")
