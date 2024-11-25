@@ -1,3 +1,4 @@
+# Modificado para incluir peso de inércia adaptativo
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,6 +12,8 @@ PERSONAL_C = 2.0        # Coeficiente pessoal
 SOCIAL_C = 2.0          # Coeficiente social
 CONVERGENCE = 0.001     # Critério de convergência
 MAX_ITER = 100          # Número máximo de iterações
+W_INIT = 0.9            # Peso de inércia inicial
+W_FINAL = 0.4           # Peso de inércia final
 
 # Função de custo (Ackley)
 def cost_function(pos):
@@ -71,11 +74,12 @@ class Swarm:
 # Função principal para o PSO
 def particle_swarm_optimization():
     swarm = Swarm(POPULATION, DIMENSIONS)
-    inertia_weight = 0.5 + np.random.random() / 2.0
-
     iterations_data = []
 
     for iter_num in range(MAX_ITER):
+        # Peso de inércia decai linearmente
+        inertia_weight = W_INIT - (W_INIT - W_FINAL) * (iter_num / MAX_ITER)
+        
         swarm.update(inertia_weight)
 
         avg_pos_z = np.mean([p.pos_z for p in swarm.particles])
@@ -108,4 +112,4 @@ def plot_iterations(data, filename):
 # Executa o PSO e plota os resultados
 if __name__ == "__main__":
     iterations_data = particle_swarm_optimization()
-    plot_iterations(iterations_data, "pso_results.png")
+    plot_iterations(iterations_data, "pso_results_with_inertia.png")

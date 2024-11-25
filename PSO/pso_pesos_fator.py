@@ -1,16 +1,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from concurrent.futures import ThreadPoolExecutor
 
-# Constantes
-DIMENSIONS = 10         # Número de dimensões
-GLOBAL_BEST = 0.0       # Melhor valor global da função de custo
-B_LO, B_HI = -5.0, 5.0  # Limites do espaço de busca
-POPULATION = 20         # Número de partículas
+DIMENSIONS = 10         
+GLOBAL_BEST = 0.0       
+B_LO, B_HI = -5.0, 5.0  # Espaço de busca
+POPULATION = 20         
 V_MAX = 0.1             # Velocidade máxima
 PERSONAL_C = 2.0        # Coeficiente pessoal
 SOCIAL_C = 2.0          # Coeficiente social
-CONVERGENCE = 0.001     # Critério de convergência
-MAX_ITER = 100          # Número máximo de iterações
+CONVERGENCE = 0.000001     # Critério de convergência
+MAX_ITER = 1000000         # Máximo de iterações
+
+#Pesos
+W_INIT = 0.9            # Peso de inércia inicial
+W_FINAL = 0.4           # Peso de inércia final
+
+# Fator de constrição (k) e cálculo de phi
+PHI = PERSONAL_C + SOCIAL_C
+CONSTRICTION_FACTOR = 2 / abs(2 - PHI - np.sqrt(PHI ** 2 - 4 * PHI))
 
 # Função de custo (Ackley)
 def cost_function(pos):
@@ -39,7 +47,9 @@ class Particle:
         r1, r2 = np.random.random(DIMENSIONS), np.random.random(DIMENSIONS)
         cognitive = PERSONAL_C * r1 * (self.best_pos - self.pos)
         social = SOCIAL_C * r2 * (global_best_pos - self.pos)
-        self.velocity = inertia_weight * self.velocity + cognitive + social
+        self.velocity = CONSTRICTION_FACTOR * (
+            inertia_weight * self.velocity + cognitive + social
+        )
         self.velocity = np.clip(self.velocity, -V_MAX, V_MAX)
 
     def update_position(self):
@@ -59,23 +69,33 @@ class Swarm:
         self.best_pos_z = min(p.best_pos_z for p in self.particles)
 
     def update(self, inertia_weight):
-        for particle in self.particles:
-            particle.update_velocity(self.best_pos, inertia_weight)
-            particle.update_position()
+        # Paralelizar a atualização de partículas
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(self.update_particle, particle, inertia_weight)
+                for particle in self.particles
+            ]
+            for future in futures:
+                future.result()  # Aguarda a execução de todas as threads
 
+        # Atualiza a melhor partícula global
         best_particle = min(self.particles, key=lambda p: p.best_pos_z)
         if best_particle.best_pos_z < self.best_pos_z:
             self.best_pos = best_particle.best_pos
             self.best_pos_z = best_particle.best_pos_z
+    
+    def update_particle(self, particle, inertia_weight):
+        particle.update_velocity(self.best_pos, inertia_weight)
+        particle.update_position()
 
 # Função principal para o PSO
 def particle_swarm_optimization():
     swarm = Swarm(POPULATION, DIMENSIONS)
-    inertia_weight = 0.5 + np.random.random() / 2.0
-
     iterations_data = []
 
     for iter_num in range(MAX_ITER):
+        # Reduz o peso de inércia linearmente
+        inertia_weight = W_INIT - (W_INIT - W_FINAL) * (iter_num / MAX_ITER)
         swarm.update(inertia_weight)
 
         avg_pos_z = np.mean([p.pos_z for p in swarm.particles])
@@ -88,7 +108,11 @@ def particle_swarm_optimization():
     print("Melhor posição encontrada:", swarm.best_pos)
     print("Melhor valor encontrado:", swarm.best_pos_z)
 
-    return iterations_data
+    print("Distância ao zero por dimensão:")
+    for i, value in enumerate(swarm.best_pos):
+        print(f"Dimensão {i+1}: {value:.6f}")
+
+    return iterations_data, swarm.best_pos, swarm.best_pos_z
 
 # Função para plotar os resultados
 def plot_iterations(data, filename):
@@ -107,5 +131,5 @@ def plot_iterations(data, filename):
 
 # Executa o PSO e plota os resultados
 if __name__ == "__main__":
-    iterations_data = particle_swarm_optimization()
-    plot_iterations(iterations_data, "pso_results.png")
+    iterations_data, best_pos, best_pos_z = particle_swarm_optimization()
+    plot_iterations(iterations_data, "resultado.png")
