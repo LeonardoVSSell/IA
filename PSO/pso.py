@@ -4,13 +4,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 DIMENSIONS = 10         
 GLOBAL_BEST = 0.0       
-B_LO, B_HI = -5.0, 5.0  #espaço de busca
+B_LO, B_HI = -5.0, 5.0  # Espaço de busca
 POPULATION = 20         
-V_MAX = 0.1             #velocidade maxima
-PERSONAL_C = 2.0        #coeficiente pessoal
-SOCIAL_C = 2.0          #coeficiente social
-CONVERGENCE = 0.001     #critério de convergência
-MAX_ITER = 1000               
+V_MAX = 0.1             # Velocidade máxima
+PERSONAL_C = 2.0        # Coeficiente pessoal
+SOCIAL_C = 2.0          # Coeficiente social
+CONVERGENCE = 0.0001     # Critério de convergência
+MAX_ITER = 100         # Máximo de iterações
+
+# Fator de constrição (k) e cálculo de phi
+PHI = PERSONAL_C + SOCIAL_C
+CONSTRICTION_FACTOR = 2 / abs(2 - PHI - np.sqrt(PHI ** 2 - 4 * PHI))
 
 # Função de custo (Ackley)
 def cost_function(pos):
@@ -39,7 +43,9 @@ class Particle:
         r1, r2 = np.random.random(DIMENSIONS), np.random.random(DIMENSIONS)
         cognitive = PERSONAL_C * r1 * (self.best_pos - self.pos)
         social = SOCIAL_C * r2 * (global_best_pos - self.pos)
-        self.velocity = inertia_weight * self.velocity + cognitive + social
+        self.velocity = CONSTRICTION_FACTOR * (
+            inertia_weight * self.velocity + cognitive + social
+        )
         self.velocity = np.clip(self.velocity, -V_MAX, V_MAX)
 
     def update_position(self):
@@ -81,11 +87,19 @@ class Swarm:
 # Função principal para o PSO
 def particle_swarm_optimization():
     swarm = Swarm(POPULATION, DIMENSIONS)
-    inertia_weight = 0.5 + np.random.random() / 2.0
+
+    # Peso de inércia inicial
+    inertia_weight = 0.9
+    inertia_weight_min = 0.4
 
     iterations_data = []
 
     for iter_num in range(MAX_ITER):
+        # Reduz o peso de inércia linearmente
+        inertia_weight = max(
+            inertia_weight_min,
+            inertia_weight - (0.9 - inertia_weight_min) / MAX_ITER
+        )
         swarm.update(inertia_weight)
 
         avg_pos_z = np.mean([p.pos_z for p in swarm.particles])
@@ -98,7 +112,11 @@ def particle_swarm_optimization():
     print("Melhor posição encontrada:", swarm.best_pos)
     print("Melhor valor encontrado:", swarm.best_pos_z)
 
-    return iterations_data
+    print("Distância ao zero por dimensão:")
+    for i, value in enumerate(swarm.best_pos):
+        print(f"Dimensão {i+1}: {value:.6f}")
+
+    return iterations_data, swarm.best_pos, swarm.best_pos_z
 
 # Função para plotar os resultados
 def plot_iterations(data, filename):
@@ -117,5 +135,5 @@ def plot_iterations(data, filename):
 
 # Executa o PSO e plota os resultados
 if __name__ == "__main__":
-    iterations_data = particle_swarm_optimization()
+    iterations_data, best_pos, best_pos_z = particle_swarm_optimization()
     plot_iterations(iterations_data, "resultado.png")
