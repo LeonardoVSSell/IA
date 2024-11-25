@@ -10,7 +10,7 @@ V_MAX = 0.1             # Velocidade máxima
 PERSONAL_C = 2.0        # Coeficiente pessoal
 SOCIAL_C = 2.0          # Coeficiente social
 CONVERGENCE = 0.000001     # Critério de convergência
-MAX_ITER = 1000000         # Máximo de iterações
+MAX_ITER = 1000         # Máximo de iterações
 
 #Pesos
 W_INIT = 0.9            # Peso de inércia inicial
