@@ -1,19 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from concurrent.futures import ThreadPoolExecutor
 
 DIMENSIONS = 10         
 GLOBAL_BEST = 0.0       
-B_LO, B_HI = -5.0, 5.0  # Espaço de busca
+B_LO, B_HI = -32.0, 32.0  # Espaço de busca
 POPULATION = 20         
 V_MAX = 0.1             # Velocidade máxima
 PERSONAL_C = 2.0        # Coeficiente pessoal
 SOCIAL_C = 2.0          # Coeficiente social
 CONVERGENCE = 0.000001     # Critério de convergência
-MAX_ITER = 1000         # Máximo de iterações
+MAX_ITER = 2000         # Máximo de iterações
 
 #Pesos
-W_INIT = 0.9            # Peso de inércia inicial
+W_INIT = 1.5            # Peso de inércia inicial
 W_FINAL = 0.4           # Peso de inércia final
 
 # Fator de constrição (k) e cálculo de phi
@@ -69,16 +68,10 @@ class Swarm:
         self.best_pos_z = min(p.best_pos_z for p in self.particles)
 
     def update(self, inertia_weight):
-        # Paralelizar a atualização de partículas
-        with ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(self.update_particle, particle, inertia_weight)
-                for particle in self.particles
-            ]
-            for future in futures:
-                future.result()  # Aguarda a execução de todas as threads
+        for particle in self.particles:
+            particle.update_velocity(self.best_pos, inertia_weight)
+            particle.update_position()
 
-        # Atualiza a melhor partícula global
         best_particle = min(self.particles, key=lambda p: p.best_pos_z)
         if best_particle.best_pos_z < self.best_pos_z:
             self.best_pos = best_particle.best_pos
@@ -101,9 +94,9 @@ def particle_swarm_optimization():
         avg_pos_z = np.mean([p.pos_z for p in swarm.particles])
         iterations_data.append((iter_num, swarm.best_pos_z, avg_pos_z))
 
-        if abs(swarm.best_pos_z - GLOBAL_BEST) < CONVERGENCE:
-            print(f"Convergência atingida em {iter_num} iterações.")
-            break
+        #if abs(swarm.best_pos_z - GLOBAL_BEST) < CONVERGENCE:
+        #    print(f"Convergência atingida em {iter_num} iterações.")
+        #    break
 
     print("Melhor posição encontrada:", swarm.best_pos)
     print("Melhor valor encontrado:", swarm.best_pos_z)
@@ -122,6 +115,7 @@ def plot_iterations(data, filename):
     plt.plot(iterations, best_values, label="Melhor Valor", color="red")
     plt.plot(iterations, avg_values, label="Valor Médio", color="blue")
     plt.title("Valores ao Longo das Iterações")
+    plt.yscale('log')  # Define escala logarítmica no eixo Y
     plt.xlabel("Iterações")
     plt.ylabel("Valor")
     plt.legend()

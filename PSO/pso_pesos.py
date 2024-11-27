@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 # Constantes
 DIMENSIONS = 10         # Número de dimensões
 GLOBAL_BEST = 0.0       # Melhor valor global da função de custo
-B_LO, B_HI = -5.0, 5.0  # Limites do espaço de busca
+B_LO, B_HI = -32.0, 32.0  # Limites do espaço de busca
 POPULATION = 20         # Número de partículas
 V_MAX = 0.1             # Velocidade máxima
 PERSONAL_C = 2.0        # Coeficiente pessoal
 SOCIAL_C = 2.0          # Coeficiente social
 CONVERGENCE = 0.001     # Critério de convergência
 MAX_ITER = 100          # Número máximo de iterações
-W_INIT = 0.9            # Peso de inércia inicial
-W_FINAL = 0.4           # Peso de inércia final
+W_MIN = 0.9            # Peso de inércia inicial
+W_MAX = 0.4           # Peso de inércia final
 
 # Função de custo (Ackley)
 def cost_function(pos):
@@ -78,7 +78,7 @@ def particle_swarm_optimization():
 
     for iter_num in range(MAX_ITER):
         # Peso de inércia decai linearmente
-        inertia_weight = W_INIT - (W_INIT - W_FINAL) * (iter_num / MAX_ITER)
+        inertia_weight = W_MIN - (W_MIN - W_MAX) * (iter_num / MAX_ITER)
         
         swarm.update(inertia_weight)
 
@@ -102,6 +102,7 @@ def plot_iterations(data, filename):
     plt.plot(iterations, best_values, label="Melhor Valor", color="red")
     plt.plot(iterations, avg_values, label="Valor Médio", color="blue")
     plt.title("Valores ao Longo das Iterações")
+    plt.yscale('log')  # Define escala logarítmica no eixo Y
     plt.xlabel("Iterações")
     plt.ylabel("Valor")
     plt.legend()
