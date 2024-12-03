@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
 
-DIMENSIONS = 10         
+DIMENSIONS = 20         
 GLOBAL_BEST = 0.0       
 B_LO, B_HI = -5.0, 5.0  # Espaço de busca
 POPULATION = 20         
@@ -10,7 +10,7 @@ V_MAX = 0.1             # Velocidade máxima
 PERSONAL_C = 2.0        # Coeficiente pessoal
 SOCIAL_C = 2.0          # Coeficiente social
 CONVERGENCE = 0.000001     # Critério de convergência
-MAX_ITER = 1000         # Máximo de iterações
+MAX_ITER = 10000         # Máximo de iterações
 
 #Pesos
 W_INIT = 0.9            # Peso de inércia inicial
@@ -110,7 +110,7 @@ def particle_swarm_optimization():
 
     print("Distância ao zero por dimensão:")
     for i, value in enumerate(swarm.best_pos):
-        print(f"Dimensão {i+1}: {value:.6f}")
+        print(f"Dimensão {i+1}: {value}")
 
     return iterations_data, swarm.best_pos, swarm.best_pos_z
 
