@@ -12,7 +12,7 @@ B_HI = 5.0  # Limite superior do espaço de busca
 POPULATION = 30  # Número de partículas no enxame
 V_MAX = 0.1  # Velocidade máxima
 CONVERGENCE = 0.000001  # Critério de convergência
-MAX_ITER = 10000  # Número máximo de iterações
+MAX_ITER = 5000  # Número máximo de iterações
 
 # Estrutura da Partícula
 class Particle:
@@ -96,9 +96,9 @@ def particle_swarm_optimization_base():
         })
 
         # Verificar convergência
-        if abs(swarm.best_pos_z - GLOBAL_BEST) < CONVERGENCE:
-            print(f"Convergência atingida após {curr_iter} iterações.")
-            break
+        #if abs(swarm.best_pos_z - GLOBAL_BEST) < CONVERGENCE:
+        #    print(f"Convergência atingida após {curr_iter} iterações.")
+        #    break
 
         curr_iter += 1
 

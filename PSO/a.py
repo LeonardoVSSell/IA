@@ -100,7 +100,7 @@ params = {
     "n_particles": 20,
     "dim": 10,
     "bounds": (-32, 32),
-    "w": 1, #0 ate 1.5
+    "w": 0.5, #0 ate 1.5
     "c1": 2.05,
     "c2": 2.05,
     "n_iterations": 1000,

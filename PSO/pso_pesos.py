@@ -85,9 +85,9 @@ def particle_swarm_optimization():
         avg_pos_z = np.mean([p.pos_z for p in swarm.particles])
         iterations_data.append((iter_num, swarm.best_pos_z, avg_pos_z))
 
-        if abs(swarm.best_pos_z - GLOBAL_BEST) < CONVERGENCE:
-            print(f"Convergência atingida em {iter_num} iterações.")
-            break
+        #if abs(swarm.best_pos_z - GLOBAL_BEST) < CONVERGENCE:
+        #    print(f"Convergência atingida em {iter_num} iterações.")
+        #    break
 
     print("Melhor posição encontrada:", swarm.best_pos)
     print("Melhor valor encontrado:", swarm.best_pos_z)
@@ -101,10 +101,10 @@ def plot_iterations(data, filename):
     plt.figure(figsize=(10, 6))
     plt.plot(iterations, best_values, label="Melhor Valor", color="red")
     plt.plot(iterations, avg_values, label="Valor Médio", color="blue")
-    plt.title("Valores ao Longo das Iterações")
+    plt.title("Valores + Pesos")
     plt.yscale('log')  # Define escala logarítmica no eixo Y
     plt.xlabel("Iterações")
-    plt.ylabel("Valor")
+    plt.ylabel("Valor(ln)")
     plt.legend()
     plt.grid()
     plt.savefig(filename)
